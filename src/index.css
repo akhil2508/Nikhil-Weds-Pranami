@@ -1,0 +1,85 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --color-emerald-deep: #1B3A2F;
+    --color-terracotta: #A34A3A;
+    --color-gold-soft: #D4A373;
+    --color-ivory: #FCF8F5;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    color: #1B3A2F;
+    background-color: #FCF8F5;
+  }
+}
+
+.font-script {
+  font-family: 'Great Vibes', cursive;
+}
+
+.font-serif-cormorant {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+}
+
+.font-sans-jost {
+  font-family: 'Jost', sans-serif;
+}
+
+/* Hero date shadow as specified */
+.hero-date-shadow {
+  text-shadow: 0 0 14px rgba(255, 255, 255, 0.95), 0 2px 8px rgba(255, 255, 255, 0.9);
+}
+
+.hero-title-shadow {
+  text-shadow: 0 4px 18px rgba(0, 0, 0, 0.45);
+}
+
+/* Glass Card styling for desktop */
+.glass-card {
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(212, 163, 115, 0.35);
+  box-shadow: 0 25px 50px -12px rgba(27, 58, 47, 0.15);
+}
+
+/* Desktop Fixed Blurred Background */
+@media (min-width: 901px) {
+  .events-desktop-container {
+    background-image: url('/images/background-image.jpg'), url('/images/background image.jpg'), url('/public/assets/aistudio/background-image_a0e0e66d.jpeg');
+    background-attachment: fixed;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+  }
+}
+
+/* Fade in animation styles */
+.reveal-item {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reveal-item.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #FCF8F5;
+}
+::-webkit-scrollbar-thumb {
+  background: #D4A373;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #A34A3A;
+}

@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nikhil & Pranami · Wedding Celebration</title>
+  <meta name="description" content="Join us in celebrating the wedding of Nikhil and Pranami on 11 · 12 · 2026 at Royal Anand Resort & Club, Kanpur.">
+  
+  <!-- Google Fonts: Great Vibes, Cormorant Garamond, Jost -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Great+Vibes&family=Jost:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Hidden Background Music Audio Tag -->
+  <audio id="bg-music" src="music/thousand-years.mp3" loop preload="auto"></audio>
+
+
+
+  <!-- 3.B: Fixed Top Navigation Bar -->
+  <header class="top-nav">
+    <div class="nav-container">
+      <a href="#hero" class="nav-logo">N & P</a>
+      <nav class="nav-links">
+        <a href="#welcome">Welcome</a>
+        <a href="#events">Events</a>
+        <a href="#venue">Venue</a>
+        <a href="#faq">FAQ</a>
+        <a href="#rsvp">RSVP</a>
+        <a href="#blessings">Blessings</a>
+      </nav>
+      <div class="nav-actions">
+        <a id="nav-cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=Nikhil+%26+Pranami+Wedding+Celebration&dates=20261211T113000Z/20261212T023000Z&details=Celebrate+the+wedding+of+Nikhil+and+Pranami+at+Royal+Anand+Resort+%26+Club.+Contact+Akhil+Shukla:+9919892622&location=Royal+Anand+Resort+%26+Club%2C+Kanpur%2C+Uttar+Pradesh" target="_blank" rel="noreferrer" class="cal-pill">Add to Calendar</a>
+        <a href="#rsvp" class="rsvp-pill">RSVP</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- 3.B: Hero Section -->
+  <section id="hero" class="hero-section">
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <h1 class="hero-title">Nikhil & Pranami</h1>
+      
+      <!-- Date in Terracotta with white text shadow -->
+      <div class="hero-date">11 · 12 · 2026</div>
+
+      <!-- Add to Calendar Buttons -->
+      <div class="cal-button-wrap">
+        <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=Nikhil+%26+Pranami+Wedding+Celebration&dates=20261211T113000Z/20261212T023000Z&details=Celebrate+the+wedding+of+Nikhil+and+Pranami+at+Royal+Anand+Resort+%26+Club.+Contact+Akhil+Shukla:+9919892622&location=Royal+Anand+Resort+%26+Club%2C+Kanpur%2C+Uttar+Pradesh" target="_blank" rel="noreferrer" class="btn-cal-hero">
+          📅 Add to Google Calendar
+        </a>
+        <button id="download-ics-btn" type="button" class="btn-cal-hero-sub">
+          ⬇ Apple / Outlook Calendar (.ics)
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3.C & 3.D: Events Timeline Sections -->
+  <main id="events" class="events-container">
+    
+    <!-- Warm Welcome -->
+    <section id="welcome" class="event-slide">
+      <div class="event-bg" style="background-image: url('images/warm-welcome.jpg');"></div>
+      <div class="event-card-wrapper left">
+        <div class="event-card reveal">
+          <span class="event-kicker desktop-only">Ceremony Introduction</span>
+          <h2 class="event-heading">Warm Welcome</h2>
+          <div class="event-meta-clean">
+            <p><span class="meta-label">Venue:</span> Royal Anand Resort & Club, Kanpur</p>
+          </div>
+          <p class="event-desc desktop-only">"With the blessings of our elders and the grace of the Almighty, we invite you to celebrate the union of Nikhil & Pranami. Join us as two souls, two families, and countless memories come together in a sacred celebration of love, laughter, and timeless traditions."</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Haldi -->
+    <section id="haldi" class="event-slide">
+      <div class="event-bg" style="background-image: url('images/haldi.jpg');"></div>
+      <div class="event-card-wrapper right">
+        <div class="event-card reveal">
+          <span class="event-kicker desktop-only">Event 01</span>
+          <h2 class="event-heading">Haldi</h2>
+          <div class="event-meta-clean">
+            <p><span class="meta-label">Date:</span> Dec 09, 2026</p>
+            <p><span class="meta-label">Time:</span> 5:00 PM onwards</p>
+            <p><span class="meta-label">Venue:</span> 335/2 Shastri Nagar, Kanpur</p>
+          </div>
+          <p class="event-desc desktop-only">"A splash of yellow, fragrant turmeric paste, laughter and love as we kickstart the festivities in sun-drenched cheer and music."</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Mehndi -->
+    <section id="mehndi" class="event-slide">
+      <div class="event-bg" style="background-image: url('images/mehndi.jpg');"></div>
+      <div class="event-card-wrapper left">
+        <div class="event-card reveal">
+          <span class="event-kicker desktop-only">Event 02</span>
+          <h2 class="event-heading">Mehndi</h2>
+          <div class="event-meta-clean">
+            <p><span class="meta-label">Date:</span> Dec 10, 2026</p>
+            <p><span class="meta-label">Time:</span> 5:00 PM onwards</p>
+            <p><span class="meta-label">Venue:</span> 335/2 Shastri Nagar, Kanpur</p>
+          </div>
+          <p class="event-desc desktop-only">"Henna whispers love stories on palms, resonant dholak rhythms fill the air, and vibrant colors dance into the twilight."</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tilak -->
+    <section id="tilak" class="event-slide">
+      <div class="event-bg" style="background-image: url('images/tilak.jpg');"></div>
+      <div class="event-card-wrapper right">
+        <div class="event-card reveal">
+          <span class="event-kicker desktop-only">Event 03</span>
+          <h2 class="event-heading">Tilak Ceremony</h2>
+          <div class="event-meta-clean">
+            <p><span class="meta-label">Date:</span> Dec 11, 2026</p>
+            <p><span class="meta-label">Time:</span> 5:00 PM onwards</p>
+            <p><span class="meta-label">Venue:</span> Royal Anand Resort & Club, Kanpur</p>
+          </div>
+          <p class="event-desc desktop-only">"The sacred auspicious start, holy Vedic chants, vermilion blessings, and time-honored customs welcoming the groom."</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Shaadi -->
+    <section id="shaadi" class="event-slide">
+      <div class="event-bg" style="background-image: url('images/shaadi.jpg');"></div>
+      <div class="event-card-wrapper left">
+        <div class="event-card reveal">
+          <span class="event-kicker desktop-only">Event 04</span>
+          <h2 class="event-heading">Shaadi</h2>
+          <div class="event-meta-clean">
+            <p><span class="meta-label">Date:</span> Dec 11, 2026</p>
+            <p><span class="meta-label">Time:</span> 7:00 PM onwards</p>
+            <p><span class="meta-label">Venue:</span> Royal Anand Resort & Club, Kanpur</p>
+          </div>
+          <p class="event-desc desktop-only">"The Seven Sacred Vows around the holy fire under starlit canopies — where two hearts become one forever."</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Vidai -->
+    <section id="vidai" class="event-slide">
+      <div class="event-bg" style="background-image: url('images/vidai.jpg');"></div>
+      <div class="event-card-wrapper right">
+        <div class="event-card reveal">
+          <span class="event-kicker desktop-only">Event 05</span>
+          <h2 class="event-heading">Vidai</h2>
+          <div class="event-meta-clean">
+            <p><span class="meta-label">Date:</span> Dec 12, 2026</p>
+            <p><span class="meta-label">Time:</span> 7:00 AM</p>
+            <p><span class="meta-label">Venue:</span> Royal Anand Resort & Club, Kanpur</p>
+          </div>
+          <p class="event-desc desktop-only">"A bittersweet morning filled with emotional tears, thrown handfuls of puffed rice, and tender blessings as the bride begins her new journey."</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- 3.E: Solid Sections (Below Events) -->
+  
+  <!-- 1. Venue Section (Exact Royal Anand Resort Google Maps Iframe) -->
+  <section id="venue" class="solid-section venue-section">
+    <div class="container">
+      <h2 class="section-title">Royal Anand Resort & Club</h2>
+      <p class="section-subtitle">Kanpur, Uttar Pradesh</p>
+      
+      <div class="venue-grid">
+        <div class="map-box">
+          <iframe 
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3570.5315012706424!2d80.18297327542534!3d26.503025476893818!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x399c358f7480c885%3A0xe877da1c61610887!2sRoyal%20Anand%20Resort%20%26%20Club!5e0!3m2!1sen!2sin!4v1792960494423!5m2!1sen!2sin" 
+            width="600" 
+            height="450" 
+            style="border:0;" 
+            allowfullscreen="" 
+            loading="lazy" 
+            referrerpolicy="strict-origin-when-cross-origin">
+          </iframe>
+        </div>
+        <div class="venue-info">
+          <h3>Venue & Arrival Details</h3>
+          <p><strong>Address:</strong> Royal Anand Resort & Club, GT Road / Bypass, Kanpur, UP 208001</p>
+          <p><strong>Valet Parking:</strong> Dedicated complimentary valet service is available at the entrance.</p>
+          
+          <div class="contact-box">
+            <p><strong>Venue Navigation & Questions:</strong></p>
+            <p>Contact <strong>Akhil Shukla</strong>: <a href="tel:9919892622" class="phone-link">9919892622</a></p>
+            <p><a href="https://wa.me/919919892622?text=Hi%20Akhil,%20can%20you%20help%20with%20directions%20to%20Royal%20Anand%20Resort?" target="_blank" rel="noreferrer" class="wa-link">Chat on WhatsApp</a></p>
+          </div>
+
+          <p class="pt-2"><strong>Connectivity:</strong> 25 minutes from Kanpur Central Railway Station. 90 minutes from Lucknow Airport (LKO).</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. FAQ Section (Accordion Style with Joke & Akhil Shukla Contact) -->
+  <section id="faq" class="solid-section faq-section">
+    <div class="container">
+      <h2 class="section-title">Frequently Asked Questions</h2>
+      <div class="accordion">
+        <div class="accordion-item active">
+          <button class="accordion-trigger" type="button">What is the Dress Code for the ceremonies?</button>
+          <div class="accordion-content">
+            <p><strong>Haldi:</strong> Sunshine Yellow & Floral silhouettes.</p>
+            <p><strong>Mehndi:</strong> Refreshing shades of Jade, Mint & Emerald.</p>
+            <p><strong>Tilak & Shaadi:</strong> Regal Indian Traditional (Sherwanis, Sarees, Lehengas).</p>
+            <p class="joke"><em>Shaadi: Heera jaisa bankar aana hai... agar dulhan jaisi dress pehni, toh 'Bhabhi phatey, usse pehle aap ghar ko katen.'</em> 😉</p>
+          </div>
+        </div>
+        <div class="accordion-item">
+          <button class="accordion-trigger" type="button">Whom can I contact for venue navigation or emergency queries?</button>
+          <div class="accordion-content">
+            <p>For venue navigation, arrival guidance, parking, or any emergency assistance, please reach out to:</p>
+            <p class="pt-1"><strong>Akhil Shukla:</strong> <a href="tel:9919892622" class="phone-link">9919892622</a> | <a href="https://wa.me/919919892622" target="_blank" rel="noreferrer" class="wa-link">WhatsApp</a></p>
+          </div>
+        </div>
+        <div class="accordion-item">
+          <button class="accordion-trigger" type="button">Is valet parking available at the venue?</button>
+          <div class="accordion-content">
+            <p>Yes, complimentary valet parking is arranged for all guests at the resort main gate.</p>
+          </div>
+        </div>
+        <div class="accordion-item">
+          <button class="accordion-trigger" type="button">Can I bring kids and family?</button>
+          <div class="accordion-content">
+            <p>Wholeheartedly yes! Kids bring joy, smiles, and laughter to our celebrations.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. RSVP Section -->
+  <section id="rsvp" class="solid-section rsvp-section">
+    <div class="container">
+      <h2 class="section-title">Will You Join Us?</h2>
+      <form id="rsvp-form" class="rsvp-card">
+        <label for="rsvp-name">Your Full Name *</label>
+        <input type="text" id="rsvp-name" required placeholder="e.g. Rahul Sharma & Family">
+
+        <label for="rsvp-attending">Will You Be Attending? *</label>
+        <select id="rsvp-attending">
+          <option value="Yes">Joyfully Accept (Yes)</option>
+          <option value="No">Regretfully Decline (No)</option>
+        </select>
+
+        <label for="rsvp-dance">Dance Performance at Sangeet? *</label>
+        <select id="rsvp-dance">
+          <option value="No">No, will cheer from the audience</option>
+          <option value="Yes">Yes, ready to perform!</option>
+        </select>
+
+        <!-- Conditional Sangeet Song Suggestions -->
+        <div id="dance-extra" class="dance-extra hidden">
+          <label>Pick a Song Suggestion:</label>
+          <div class="song-chips">
+            <span class="chip" data-song="Bole Chudiyan">Bole Chudiyan</span>
+            <span class="chip" data-song="Kajra Re">Kajra Re</span>
+            <span class="chip" data-song="London Thumakda">London Thumakda</span>
+            <span class="chip" data-song="Gallan Goodiyaan">Gallan Goodiyaan</span>
+            <span class="chip" data-song="Maahi Ve">Maahi Ve</span>
+            <span class="chip" data-song="Sauda Khara Khara">Sauda Khara Khara</span>
+          </div>
+          <input type="text" id="rsvp-custom-song" placeholder="Or enter your custom track title">
+        </div>
+
+        <label for="rsvp-message">Your Heartfelt Blessing</label>
+        <textarea id="rsvp-message" rows="3" placeholder="Write your warm wishes for Nikhil & Pranami..."></textarea>
+
+        <button type="submit" class="btn-submit">Send RSVP & Blessings</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- 4. Blessings Wall Section -->
+  <section id="blessings" class="solid-section blessings-section">
+    <div class="container">
+      <h2 class="section-title">The Blessings Wall</h2>
+      <div id="blessings-grid" class="blessings-grid">
+        <!-- Rendered dynamically from localStorage in script.js -->
+      </div>
+    </div>
+  </section>
+
+  <!-- 3.F: Footer (Using ❤️ in place of 'love' as requested) -->
+  <footer class="site-footer">
+    <h3 class="footer-title">Nikhil & Pranami</h3>
+    <p class="footer-copy">Made with ❤️ by Dulhan ka Devar</p>
+    <p class="footer-sub">11 · 12 · 2026 · Royal Anand Resort & Club</p>
+  </footer>
+
+  <!-- 3.A: Floating Music Toggle Button -->
+  <button id="floating-music-btn" class="floating-music-btn" aria-label="Toggle Music" type="button">
+    <span id="music-btn-icon">🔊</span>
+  </button>
+
+  <script src="script.js"></script>
+</body>
+</html>
