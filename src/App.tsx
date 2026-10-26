@@ -851,10 +851,10 @@ export default function App() {
                   }
                 }}
               >
-                <source src={getAssetUrl('assets/aistudio/NikhilwedsPranami_edc420b2.mp4')} type="video/mp4" />
-                <source src="./assets/aistudio/NikhilwedsPranami_edc420b2.mp4" type="video/mp4" />
-                <source src="assets/aistudio/NikhilwedsPranami_edc420b2.mp4" type="video/mp4" />
-                <source src="/assets/aistudio/NikhilwedsPranami_edc420b2.mp4" type="video/mp4" />
+                <source src={getAssetUrl('assets/aistudio/NikhilwedsPranami.mp4')} type="video/mp4" />
+                <source src="./assets/aistudio/NikhilwedsPranami.mp4" type="video/mp4" />
+                <source src="assets/aistudio/NikhilwedsPranami.mp4" type="video/mp4" />
+                <source src="/assets/aistudio/NikhilwedsPranami.mp4" type="video/mp4" />
                 Your browser does not support the video tag.
               </video>
 
