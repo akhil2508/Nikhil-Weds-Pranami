@@ -4,6 +4,8 @@
  */
 
 import React, { useState, useEffect, useRef } from 'react';
+import weddingStoryPoster from '../standalone/assets/wedding-story-poster.jpg';
+import weddingStoryVideo from '../standalone/assets/wedding-story.mp4';
 import {
   Volume2,
   VolumeX,
@@ -827,7 +829,7 @@ export default function App() {
                 controls
                 playsInline
                 preload="metadata"
-                poster={getAssetUrl('assets/aistudio/video-poster.jpg')}
+                poster={weddingStoryPoster}
                 className="w-full h-auto max-h-[75vh] mx-auto block object-contain"
                 onPlay={() => {
                   setIsVideoPlaying(true);
@@ -851,10 +853,7 @@ export default function App() {
                   }
                 }}
               >
-                <source src={getAssetUrl('assets/aistudio/NikhilwedsPranami.mp4')} type="video/mp4" />
-                <source src="./assets/aistudio/NikhilwedsPranami.mp4" type="video/mp4" />
-                <source src="assets/aistudio/NikhilwedsPranami.mp4" type="video/mp4" />
-                <source src="/assets/aistudio/NikhilwedsPranami.mp4" type="video/mp4" />
+                <source src={weddingStoryVideo} type="video/mp4" />
                 Your browser does not support the video tag.
               </video>
 

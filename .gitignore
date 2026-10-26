@@ -7,6 +7,5 @@ coverage/
 .env*
 !.env.example
 
-# Local artifacts
-.aistudio/
+# Local assets
 public/assets/
