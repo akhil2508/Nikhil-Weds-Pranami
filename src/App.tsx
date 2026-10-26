@@ -292,7 +292,7 @@ export default function App() {
           <p><strong>Mehndi:</strong> Refreshing Jade Green, Mint, and playful festive silhouettes.</p>
           <p><strong>Tilak & Shaadi:</strong> Regal Indian Traditional or Whatever suits you.</p>
           <div className="mt-3 p-3 bg-[#A34A3A]/10 border-l-2 border-[#A34A3A] text-sm text-[#1B3A2F] italic rounded-r">
-            <strong>Friendly Note:</strong> Shaadi में 💎 जैसा बनकर आना लेकिन दूल्हे के थोड़ा कम...और लड़कियों में,<em> जिसने पहनी दुल्हन जैसी dress वो निकल ले अपने घर के address</em> 😉
+            <strong>Friendly Note:</strong> Shaadi में 💎 जैसा बनकर आना लेकिन दूल्हे से थोड़ा कम...और लड़कियों में,<em> जिसने पहनी दुल्हन जैसी dress वो निकल ले अपने घर के address</em> 😉
           </div>
         </div>
       ),
