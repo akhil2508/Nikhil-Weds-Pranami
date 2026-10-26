@@ -9,20 +9,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let isPlaying = false;
 
-  // Start with music on: attempt autoplay immediately, and trigger on first gesture if browser blocked
+  // Try autoplay, then retry on the first interaction if the browser blocks it.
   playMusic();
 
-  const handleFirstInteraction = () => {
-    playMusic();
+  const handleFirstInteraction = (event) => {
     window.removeEventListener('click', handleFirstInteraction);
     window.removeEventListener('touchstart', handleFirstInteraction);
-    window.removeEventListener('scroll', handleFirstInteraction);
     window.removeEventListener('keydown', handleFirstInteraction);
+    if (event.target instanceof Element && event.target.closest('#floating-music-btn')) {
+      return;
+    }
+    playMusic();
   };
 
   window.addEventListener('click', handleFirstInteraction, { passive: true });
   window.addEventListener('touchstart', handleFirstInteraction, { passive: true });
-  window.addEventListener('scroll', handleFirstInteraction, { passive: true });
   window.addEventListener('keydown', handleFirstInteraction, { passive: true });
 
   function playMusic() {
@@ -31,8 +32,13 @@ document.addEventListener('DOMContentLoaded', () => {
         isPlaying = true;
         musicBtnIcon.textContent = '🔊';
       })
-      .catch((err) => {
-        console.warn('Audio auto-play policy or missing audio file:', err);
+      .catch((error) => {
+        if (error instanceof DOMException && error.name === 'NotAllowedError') {
+          isPlaying = false;
+          musicBtnIcon.textContent = '🔇';
+          return;
+        }
+        console.error('Unable to play wedding music:', error);
       });
   }
 

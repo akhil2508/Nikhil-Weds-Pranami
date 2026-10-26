@@ -62,7 +62,7 @@ const SONG_CHIPS = [
 
 export default function App() {
   // Audio state - start with music on
-  const [isPlaying, setIsPlaying] = useState(true);
+  const [isPlaying, setIsPlaying] = useState(false);
   const [wasPlayingMusic, setWasPlayingMusic] = useState(false);
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -184,48 +184,51 @@ export default function App() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Start with music on: attempt autoplay on mount, and resume on first user interaction if blocked by browser
+  // Try autoplay, then retry once on the first interaction if the browser blocks it.
   useEffect(() => {
     let unmounted = false;
+    let userInteracted = false;
 
-    const startPlaying = async () => {
+    const startPlaying = async (fromUserGesture = false) => {
       const started = await weddingAudio.startAudio();
-      if (!unmounted && started) {
-        setIsPlaying(true);
+      if (!unmounted && (fromUserGesture || !userInteracted)) {
+        setIsPlaying(started);
       }
     };
 
-    // Attempt playback immediately on load
-    startPlaying();
-
-    // Fallback for browser autoplay policies: trigger on first user gesture
-    const handleFirstGesture = () => {
-      startPlaying();
+    const handleFirstGesture = (event: Event) => {
+      if (userInteracted) return;
+      userInteracted = true;
       window.removeEventListener('click', handleFirstGesture);
       window.removeEventListener('touchstart', handleFirstGesture);
       window.removeEventListener('pointerdown', handleFirstGesture);
-      window.removeEventListener('scroll', handleFirstGesture);
       window.removeEventListener('keydown', handleFirstGesture);
+      if (
+        event.target instanceof Element &&
+        event.target.closest('button[aria-label="Pause wedding music"], button[aria-label="Play wedding music"]')
+      ) {
+        return;
+      }
+      void startPlaying(true);
     };
 
     window.addEventListener('click', handleFirstGesture, { passive: true });
     window.addEventListener('touchstart', handleFirstGesture, { passive: true });
     window.addEventListener('pointerdown', handleFirstGesture, { passive: true });
-    window.addEventListener('scroll', handleFirstGesture, { passive: true });
     window.addEventListener('keydown', handleFirstGesture, { passive: true });
+    void startPlaying();
 
     return () => {
       unmounted = true;
       window.removeEventListener('click', handleFirstGesture);
       window.removeEventListener('touchstart', handleFirstGesture);
       window.removeEventListener('pointerdown', handleFirstGesture);
-      window.removeEventListener('scroll', handleFirstGesture);
       window.removeEventListener('keydown', handleFirstGesture);
     };
   }, []);
 
-  const handleToggleMusic = () => {
-    const nextState = weddingAudio.toggleAudio();
+  const handleToggleMusic = async () => {
+    const nextState = await weddingAudio.toggleAudio();
     setIsPlaying(nextState);
   };
 
