@@ -23,7 +23,10 @@ import {
   MessageCircle,
   CalendarPlus,
   Download,
-  ExternalLink
+  ExternalLink,
+  Film,
+  Play,
+  Pause
 } from 'lucide-react';
 import { weddingAudio } from './audioHelper';
 import { getAssetUrl } from './assetHelper';
@@ -45,38 +48,6 @@ interface Blessing {
   likes: number;
 }
 
-const DEFAULT_BLESSINGS: Blessing[] = [
-  {
-    id: 'seed-1',
-    name: 'Dadaji & Dadi',
-    attending: 'Yes',
-    dancing: 'No',
-    message: 'May God bless Nikhil and Pranami with lifelong happiness, patience, and boundless prosperity. Always stay each other\'s strength!',
-    timestamp: '2 hours ago',
-    likes: 18,
-  },
-  {
-    id: 'seed-2',
-    name: 'Aman & Riya (Team Groom)',
-    attending: 'Yes',
-    dancing: 'Yes',
-    song: 'Gallan Goodiyaan',
-    message: 'Can\'t wait to set the stage on fire at Sangeet! Nikhil bhai, party abhi shuru hui hai! Super happy for both of you!',
-    timestamp: 'Yesterday',
-    likes: 12,
-  },
-  {
-    id: 'seed-3',
-    name: 'Shweta Bhabhi & Rohit Bhaiya',
-    attending: 'Yes',
-    dancing: 'Yes',
-    song: 'Bole Chudiyan',
-    message: 'Welcome to the family, dear Pranami! Wishing you both an enchanting beginning to forever.',
-    timestamp: '2 days ago',
-    likes: 15,
-  },
-];
-
 const SONG_CHIPS = [
   'Bole Chudiyan',
   'Kajra Re',
@@ -90,9 +61,34 @@ const SONG_CHIPS = [
 export default function App() {
   // Audio state - start with music on
   const [isPlaying, setIsPlaying] = useState(true);
+  const [wasPlayingMusic, setWasPlayingMusic] = useState(false);
+  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showCodeModal, setShowCodeModal] = useState(false);
+  const [showCalendarModal, setShowCalendarModal] = useState(false);
   const [codeTab, setCodeTab] = useState<'html' | 'css' | 'js'>('html');
+
+  // Direct Save Date handler (strictly for 1-tap mobile action & calendar icon clicks)
+  const handleDirectSaveDate = (e?: React.MouseEvent) => {
+    if (e) {
+      e.stopPropagation();
+    }
+    const isIOS =
+      typeof navigator !== 'undefined' &&
+      (/iPad|iPhone|iPod/.test(navigator.userAgent) ||
+        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1));
+
+    if (isIOS) {
+      downloadIcsFile();
+    } else {
+      const gUrl = getGoogleCalendarUrl();
+      const newWin = window.open(gUrl, '_blank');
+      if (!newWin || newWin.closed || typeof newWin.closed === 'undefined') {
+        window.location.href = gUrl;
+      }
+    }
+  };
 
   // RSVP Form States
   const [name, setName] = useState('');
@@ -103,7 +99,7 @@ export default function App() {
   const [blessingMessage, setBlessingMessage] = useState('');
   const [formSubmitted, setFormSubmitted] = useState(false);
 
-  // Blessings Wall
+  // Blessings Wall - empty by default, only populated when a guest gives a blessing
   const [blessings, setBlessings] = useState<Blessing[]>([]);
 
   // FAQ Accordion active states
@@ -114,18 +110,21 @@ export default function App() {
 
   const eventSectionRefs = useRef<{ [key: string]: HTMLElement | null }>({});
 
-  // Initialize blessings from localStorage
+  // Initialize blessings from localStorage, stripping any legacy seed examples
   useEffect(() => {
     try {
       const stored = localStorage.getItem('wedding_blessings_nikhil_pranami');
       if (stored) {
-        setBlessings(JSON.parse(stored));
+        const parsed: Blessing[] = JSON.parse(stored);
+        // Exclude legacy mock seed examples
+        const realBlessings = parsed.filter((b) => !b.id.startsWith('seed-'));
+        setBlessings(realBlessings);
+        localStorage.setItem('wedding_blessings_nikhil_pranami', JSON.stringify(realBlessings));
       } else {
-        setBlessings(DEFAULT_BLESSINGS);
-        localStorage.setItem('wedding_blessings_nikhil_pranami', JSON.stringify(DEFAULT_BLESSINGS));
+        setBlessings([]);
       }
     } catch {
-      setBlessings(DEFAULT_BLESSINGS);
+      setBlessings([]);
     }
   }, []);
 
@@ -395,6 +394,9 @@ export default function App() {
             <a href="#events" className="hover:text-[#A34A3A] transition-colors">
               Events
             </a>
+            <a href="#our-story" className="hover:text-[#A34A3A] transition-colors">
+              Our Story
+            </a>
             <a href="#venue" className="hover:text-[#A34A3A] transition-colors">
               Venue
             </a>
@@ -410,7 +412,18 @@ export default function App() {
           </nav>
 
           {/* Right Action: Add to Calendar & Code Viewer */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
+            {/* Direct 1-tap calendar button on mobile (no explicit text, directly opens calendar) */}
+            <button
+              type="button"
+              onClick={handleDirectSaveDate}
+              className="sm:hidden p-1.5 rounded-lg border border-[#D4A373]/50 bg-[#D4A373]/20 hover:bg-[#D4A373]/35 text-[#A34A3A] transition-colors cursor-pointer"
+              title="Save wedding date to calendar"
+              aria-label="Save wedding date to calendar"
+            >
+              <CalendarPlus className="h-4.5 w-4.5 text-[#A34A3A]" />
+            </button>
+
             <a
               href={getGoogleCalendarUrl()}
               target="_blank"
@@ -466,6 +479,13 @@ export default function App() {
               className="block hover:text-[#A34A3A]"
             >
               Events Timeline
+            </a>
+            <a
+              href="#our-story"
+              onClick={() => setMobileMenuOpen(false)}
+              className="block hover:text-[#A34A3A]"
+            >
+              Our Story
             </a>
             <a
               href="#venue"
@@ -546,12 +566,46 @@ export default function App() {
 
           <div className="w-32 h-px bg-gradient-to-r from-transparent via-[#D4A373] to-transparent mb-5" />
 
-          {/* Date: Terracotta with white text shadow strictly as requested */}
-          <div className="hero-date-shadow text-[#A34A3A] bg-white/95 backdrop-blur-sm px-6 py-2.5 rounded-full border border-[#D4A373] shadow-xl inline-flex items-center gap-3 mb-4">
-            <Calendar className="h-5 w-5 text-[#A34A3A]" />
-            <span className="font-serif-cormorant text-2xl sm:text-3xl font-bold tracking-wider">
+          {/* Date / Save the Date badge: Terracotta with white text shadow */}
+          <div
+            className="hero-date-shadow text-[#A34A3A] bg-white/95 hover:bg-white backdrop-blur-sm px-4 sm:px-6 py-2 sm:py-2.5 rounded-full border border-[#D4A373] hover:border-[#A34A3A] shadow-xl hover:shadow-2xl inline-flex items-center gap-2.5 sm:gap-3 mb-4 transition-all duration-200 group focus:outline-none"
+          >
+            {/* Clickable Calendar Icon: directly saves wedding date in calendar */}
+            <button
+              type="button"
+              onClick={handleDirectSaveDate}
+              title="Click to save the wedding date in your calendar"
+              aria-label="Save wedding date in calendar"
+              className="p-1 -m-1 rounded-full text-[#A34A3A] hover:bg-[#A34A3A]/10 active:scale-90 transition-all cursor-pointer flex items-center justify-center focus:outline-none focus:ring-1 focus:ring-[#A34A3A]"
+            >
+              <Calendar className="h-5 w-5 text-[#A34A3A] group-hover:scale-115 transition-transform" />
+            </button>
+
+            {/* Date: Georgia font; on mobile clicking directly saves date to calendar, on desktop opens modal */}
+            <button
+              type="button"
+              onClick={() => {
+                if (window.innerWidth < 640) {
+                  handleDirectSaveDate();
+                } else {
+                  setShowCalendarModal(true);
+                }
+              }}
+              title="11-12 December 2026"
+              className="font-serif-cormorant text-2xl sm:text-3xl font-bold tracking-wider cursor-pointer hover:opacity-95 transition-opacity focus:outline-none"
+              style={{ fontFamily: 'Georgia' }}
+            >
               11 · 12 · 2026
-            </span>
+            </button>
+
+            {/* Explicit text: strictly HIDDEN on mobile (no "Save Date" wording on mobile), visible only on sm+ screens */}
+            <button
+              type="button"
+              onClick={() => setShowCalendarModal(true)}
+              className="hidden sm:inline-flex items-center text-xs font-sans-jost font-semibold text-[#1B3A2F]/80 bg-[#D4A373]/25 hover:bg-[#A34A3A] hover:text-white px-2.5 py-0.5 rounded-full transition-colors ml-0.5 cursor-pointer"
+            >
+              Save Date
+            </button>
           </div>
         </div>
       </section>
@@ -732,6 +786,125 @@ export default function App() {
           );
         })}
       </div>
+
+      {/* ============================================================== */}
+      {/* Our Story Video Section */}
+      {/* Placed between Events Timeline (Vidai) and Venue */}
+      {/* ============================================================== */}
+      <section
+        id="our-story"
+        className="relative py-20 md:py-28 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-[#FCF8F5] via-white to-[#FCF8F5] border-t border-[#D4A373]/30 overflow-hidden"
+      >
+        {/* Subtle decorative glow accents */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-full pointer-events-none opacity-25">
+          <div className="absolute top-12 left-8 w-72 h-72 rounded-full bg-[#D4A373]/25 blur-3xl" />
+          <div className="absolute bottom-12 right-8 w-80 h-80 rounded-full bg-[#A34A3A]/20 blur-3xl" />
+        </div>
+
+        <div className="relative z-10 max-w-5xl mx-auto">
+          {/* Section Header */}
+          <div className="text-center max-w-2xl mx-auto mb-10 md:mb-14">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#D4A373]/15 border border-[#D4A373]/40 text-[#A34A3A] font-sans-jost text-xs font-semibold tracking-[0.25em] uppercase mb-3 shadow-xs">
+              <Heart className="w-3.5 h-3.5 fill-[#A34A3A] text-[#A34A3A]" />
+              <span>A Journey of Love &amp; Togetherness</span>
+              <Sparkles className="w-3.5 h-3.5 text-[#D4A373]" />
+            </div>
+
+            <h2 className="font-script text-5xl sm:text-6xl md:text-7xl text-[#1B3A2F] mt-1 leading-tight">
+              Our Story
+            </h2>
+            <div className="h-px w-28 mx-auto bg-gradient-to-r from-transparent via-[#D4A373] to-transparent my-3.5" />
+            <p className="font-serif-cormorant text-lg sm:text-xl text-[#1B3A2F]/80 italic max-w-xl mx-auto">
+              "Every love story is beautiful, but ours is our favorite. Celebrate the cherished moments and memories leading to forever."
+            </p>
+          </div>
+
+          {/* Video Player Container */}
+          <div className="relative mx-auto max-w-4xl bg-white/90 p-3 sm:p-5 md:p-6 rounded-2xl md:rounded-3xl border border-[#D4A373]/40 shadow-2xl backdrop-blur-xs">
+            <div className="relative rounded-xl md:rounded-2xl overflow-hidden bg-black/95 shadow-inner group">
+              <video
+                ref={videoRef}
+                controls
+                playsInline
+                preload="metadata"
+                poster={getAssetUrl('assets/aistudio/video-poster.jpg')}
+                className="w-full h-auto max-h-[75vh] mx-auto block object-contain"
+                onPlay={() => {
+                  setIsVideoPlaying(true);
+                  if (isPlaying) {
+                    weddingAudio.pauseAudio();
+                    setWasPlayingMusic(true);
+                  }
+                }}
+                onPause={() => {
+                  setIsVideoPlaying(false);
+                  if (wasPlayingMusic) {
+                    weddingAudio.startAudio();
+                    setWasPlayingMusic(false);
+                  }
+                }}
+                onEnded={() => {
+                  setIsVideoPlaying(false);
+                  if (wasPlayingMusic) {
+                    weddingAudio.startAudio();
+                    setWasPlayingMusic(false);
+                  }
+                }}
+              >
+                <source src={getAssetUrl('assets/aistudio/NikhilwedsPranami_edc420b2.mp4')} type="video/mp4" />
+                <source src="./assets/aistudio/NikhilwedsPranami_edc420b2.mp4" type="video/mp4" />
+                <source src="assets/aistudio/NikhilwedsPranami_edc420b2.mp4" type="video/mp4" />
+                <source src="/assets/aistudio/NikhilwedsPranami_edc420b2.mp4" type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
+
+              {/* Big Play Overlay (shown when paused for guaranteed 1-tap playback on iOS and Android) */}
+              {!isVideoPlaying && (
+                <button
+                  type="button"
+                  onClick={async () => {
+                    if (!videoRef.current) return;
+                    try {
+                      if (isPlaying) {
+                        weddingAudio.pauseAudio();
+                        setWasPlayingMusic(true);
+                      }
+                      await videoRef.current.play();
+                      setIsVideoPlaying(true);
+                    } catch (e) {
+                      console.warn('Video play triggered:', e);
+                    }
+                  }}
+                  className="absolute inset-0 w-full h-full flex flex-col items-center justify-center bg-black/30 hover:bg-black/20 active:bg-black/45 transition-all cursor-pointer z-10"
+                  aria-label="Play Nikhil & Pranami Wedding Story Video"
+                >
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-[#A34A3A]/90 hover:bg-[#A34A3A] text-white flex items-center justify-center shadow-2xl border-2 border-white/90 transform hover:scale-110 active:scale-95 transition-all">
+                    <Play className="w-8 h-8 sm:w-9 sm:h-9 fill-white text-white translate-x-0.5" />
+                  </div>
+                  <span className="mt-3 px-4 py-1.5 rounded-full bg-black/65 backdrop-blur-sm text-white font-sans-jost text-xs sm:text-sm font-medium tracking-wide border border-white/20 shadow-md">
+                    Watch Our Story
+                  </span>
+                </button>
+              )}
+            </div>
+
+            {/* Video Caption & Info */}
+            <div className="mt-4 px-2 sm:px-3 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs font-sans-jost text-[#1B3A2F]/75">
+              <div className="flex items-center gap-2 font-medium">
+                <span className="p-1 rounded-md bg-[#A34A3A]/10 text-[#A34A3A]">
+                  <Film className="w-4 h-4" />
+                </span>
+                <span className="font-semibold text-[#1B3A2F]">Nikhil &amp; Pranami</span>
+                <span className="text-[#D4A373]">•</span>
+                <span>The Journey to Forever</span>
+              </div>
+              <span className="text-center sm:text-right text-[#1B3A2F]/65 italic">
+                Press play to watch our story
+              </span>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* ============================================================== */}
       {/* 3.E: Solid Sections (Below Events) */}
@@ -1094,50 +1267,70 @@ export default function App() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {blessings.map((b) => (
-              <div
-                key={b.id}
-                className="p-6 rounded-2xl bg-[#FCF8F5] border border-[#D4A373]/35 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between"
+          {blessings.length === 0 ? (
+            <div className="max-w-md mx-auto text-center py-12 px-6 rounded-2xl bg-[#FCF8F5] border border-dashed border-[#D4A373]/60 shadow-sm">
+              <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-[#A34A3A]/10 flex items-center justify-center text-[#A34A3A]">
+                <Heart className="h-6 w-6 fill-[#A34A3A]/20" />
+              </div>
+              <h3 className="font-serif-cormorant text-2xl font-bold text-[#1B3A2F] mb-2">
+                Be the First to Send a Blessing!
+              </h3>
+              <p className="font-sans-jost text-sm text-[#1B3A2F]/70 mb-5">
+                No wishes have been posted yet. Fill in the RSVP form above to send your love, congratulations, or dance track for Nikhil & Pranami.
+              </p>
+              <a
+                href="#rsvp"
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#A34A3A] text-white text-xs font-sans-jost font-semibold uppercase tracking-wider rounded-xl hover:bg-[#A34A3A]/90 transition-all shadow-sm"
               >
-                <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="font-serif-cormorant text-2xl font-bold text-[#1B3A2F]">
-                      {b.name}
-                    </span>
-                    <span className="text-[11px] font-sans-jost text-[#1B3A2F]/60">
-                      {b.timestamp}
-                    </span>
+                <span>Write a Blessing</span>
+              </a>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {blessings.map((b) => (
+                <div
+                  key={b.id}
+                  className="p-6 rounded-2xl bg-[#FCF8F5] border border-[#D4A373]/35 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between"
+                >
+                  <div>
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="font-serif-cormorant text-2xl font-bold text-[#1B3A2F]">
+                        {b.name}
+                      </span>
+                      <span className="text-[11px] font-sans-jost text-[#1B3A2F]/60">
+                        {b.timestamp}
+                      </span>
+                    </div>
+
+                    {b.dancing === 'Yes' && b.song && (
+                      <div className="mb-3 inline-flex items-center gap-1.5 px-2.5 py-1 bg-[#D4A373]/20 rounded-md text-xs font-sans-jost text-[#A34A3A] font-medium">
+                        <Music className="h-3 w-3" />
+                        <span>Sangeet Track: {b.song}</span>
+                      </div>
+                    )}
+
+                    <p className="font-serif-cormorant text-base text-[#1B3A2F]/85 italic leading-relaxed">
+                      "{b.message}"
+                    </p>
                   </div>
 
-                  {b.dancing === 'Yes' && b.song && (
-                    <div className="mb-3 inline-flex items-center gap-1.5 px-2.5 py-1 bg-[#D4A373]/20 rounded-md text-xs font-sans-jost text-[#A34A3A] font-medium">
-                      <Music className="h-3 w-3" />
-                      <span>Sangeet Track: {b.song}</span>
-                    </div>
-                  )}
-
-                  <p className="font-serif-cormorant text-base text-[#1B3A2F]/85 italic leading-relaxed">
-                    "{b.message}"
-                  </p>
+                  <div className="mt-5 pt-3 border-t border-[#D4A373]/20 flex items-center justify-between">
+                    <span className="text-xs font-sans-jost text-[#1B3A2F]/60">
+                      Status: {b.attending === 'Yes' ? 'Attending with joy' : 'Well wisher'}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => handleLikeBlessing(b.id)}
+                      className="flex items-center gap-1.5 text-xs font-sans-jost text-[#A34A3A] hover:scale-105 active:scale-95 transition-transform cursor-pointer"
+                    >
+                      <Heart className="h-4 w-4 fill-[#A34A3A]/20 text-[#A34A3A]" />
+                      <span>{b.likes}</span>
+                    </button>
+                  </div>
                 </div>
-
-                <div className="mt-5 pt-3 border-t border-[#D4A373]/20 flex items-center justify-between">
-                  <span className="text-xs font-sans-jost text-[#1B3A2F]/60">
-                    Status: {b.attending === 'Yes' ? 'Attending with joy' : 'Well wisher'}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => handleLikeBlessing(b.id)}
-                    className="flex items-center gap-1.5 text-xs font-sans-jost text-[#A34A3A] hover:scale-105 active:scale-95 transition-transform cursor-pointer"
-                  >
-                    <Heart className="h-4 w-4 fill-[#A34A3A]/20 text-[#A34A3A]" />
-                    <span>{b.likes}</span>
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
@@ -1255,6 +1448,96 @@ export default function App() {
                 Check the updated code blocks directly below in chat or from the /standalone directory!
               </p>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ============================================================== */}
+      {/* Save the Date to Calendar Modal */}
+      {/* ============================================================== */}
+      {showCalendarModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fadeIn"
+          onClick={() => setShowCalendarModal(false)}
+        >
+          <div
+            className="relative w-full max-w-md bg-[#FCF8F5] text-[#1B3A2F] rounded-2xl border-2 border-[#D4A373] shadow-2xl p-6 sm:p-7 overflow-hidden text-center"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close button */}
+            <button
+              type="button"
+              onClick={() => setShowCalendarModal(false)}
+              className="absolute top-4 right-4 p-1.5 rounded-full text-[#1B3A2F]/60 hover:text-[#A34A3A] hover:bg-[#D4A373]/20 transition-colors cursor-pointer"
+              aria-label="Close calendar options"
+            >
+              <X className="h-5 w-5" />
+            </button>
+
+            {/* Icon & Title */}
+            <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-[#A34A3A]/10 text-[#A34A3A] mb-3">
+              <CalendarPlus className="h-6 w-6 text-[#A34A3A]" />
+            </div>
+
+            <h3 className="font-serif-cormorant text-2xl sm:text-3xl font-bold text-[#1B3A2F] mb-1">
+              Save the Date
+            </h3>
+            <p className="font-script text-xl text-[#A34A3A] mb-4">
+              Nikhil & Pranami's Wedding
+            </p>
+
+            {/* Event Summary Card */}
+            <div className="bg-white rounded-xl p-4 border border-[#D4A373]/40 shadow-sm text-left text-xs sm:text-sm space-y-2 mb-5">
+              <div className="flex items-start gap-2 text-[#1B3A2F]">
+                <Calendar className="h-4 w-4 text-[#A34A3A] mt-0.5 shrink-0" />
+                <div>
+                  <span className="font-bold">Date:</span> December 11 – 12, 2026
+                </div>
+              </div>
+              <div className="flex items-start gap-2 text-[#1B3A2F]">
+                <Clock className="h-4 w-4 text-[#D4A373] mt-0.5 shrink-0" />
+                <div>
+                  <span className="font-bold">Key Events:</span> Tilak (5:00 PM) · Shaadi (7:00 PM) · Vidai (Dec 12, 7:00 AM)
+                </div>
+              </div>
+              <div className="flex items-start gap-2 text-[#1B3A2F]">
+                <MapPin className="h-4 w-4 text-[#A34A3A] mt-0.5 shrink-0" />
+                <div>
+                  <span className="font-bold">Venue:</span> Royal Anand Resort & Club, Kanpur
+                </div>
+              </div>
+            </div>
+
+            {/* Calendar Action Buttons */}
+            <div className="space-y-2.5">
+              <a
+                href={getGoogleCalendarUrl()}
+                target="_blank"
+                rel="noreferrer"
+                onClick={() => setShowCalendarModal(false)}
+                className="w-full inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-[#A34A3A] hover:bg-[#8e3f31] text-white font-sans-jost text-sm font-semibold shadow-md hover:shadow-lg transition-all cursor-pointer"
+              >
+                <CalendarPlus className="h-4 w-4 text-white" />
+                <span>Add to Google Calendar</span>
+                <ExternalLink className="h-3.5 w-3.5 opacity-70 ml-auto" />
+              </a>
+
+              <button
+                type="button"
+                onClick={() => {
+                  downloadIcsFile();
+                  setShowCalendarModal(false);
+                }}
+                className="w-full inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-[#1B3A2F] hover:bg-[#152e25] text-[#FCF8F5] font-sans-jost text-sm font-semibold shadow-md hover:shadow-lg transition-all cursor-pointer"
+              >
+                <Download className="h-4 w-4 text-[#D4A373]" />
+                <span>Download Apple / Outlook / Phone (.ics)</span>
+              </button>
+            </div>
+
+            <p className="mt-4 text-[11px] font-sans-jost text-[#1B3A2F]/60">
+              Compatible with Google Calendar, Apple Calendar, iPhone, Android, and Outlook.
+            </p>
           </div>
         </div>
       )}

@@ -50,9 +50,68 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  // Story Video Audio sync & Play Overlay
+  const storyVideo = document.getElementById('our-story-video');
+  const videoPlayOverlay = document.getElementById('video-play-overlay');
+
+  if (storyVideo) {
+    let wasMusicPlayingBeforeVideo = false;
+
+    if (videoPlayOverlay) {
+      videoPlayOverlay.addEventListener('click', () => {
+        storyVideo.play().catch((err) => console.warn('Video play error:', err));
+      });
+    }
+
+    storyVideo.addEventListener('play', () => {
+      if (videoPlayOverlay) {
+        videoPlayOverlay.classList.add('hidden');
+      }
+      if (isPlaying) {
+        wasMusicPlayingBeforeVideo = true;
+        pauseMusic();
+      }
+    });
+
+    storyVideo.addEventListener('pause', () => {
+      if (videoPlayOverlay) {
+        videoPlayOverlay.classList.remove('hidden');
+      }
+      if (wasMusicPlayingBeforeVideo) {
+        playMusic();
+        wasMusicPlayingBeforeVideo = false;
+      }
+    });
+
+    storyVideo.addEventListener('ended', () => {
+      if (videoPlayOverlay) {
+        videoPlayOverlay.classList.remove('hidden');
+      }
+      if (wasMusicPlayingBeforeVideo) {
+        playMusic();
+        wasMusicPlayingBeforeVideo = false;
+      }
+    });
+  }
+
   // ==============================================================
-  // Calendar (.ics) Download
+  // Calendar (.ics & Google Calendar) Direct Action
   // ==============================================================
+  const heroDateBtn = document.getElementById('hero-date-btn');
+  const googleCalendarUrl = 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=Nikhil+%26+Pranami+Wedding+Celebration&dates=20261211T113000Z/20261212T023000Z&details=Celebrate+the+wedding+of+Nikhil+and+Pranami+at+Royal+Anand+Resort+%26+Club.+Contact+Akhil+Shukla:+9919892622&location=Royal+Anand+Resort+%26+Club%2C+Kanpur%2C+Uttar+Pradesh';
+
+  if (heroDateBtn) {
+    heroDateBtn.style.cursor = 'pointer';
+    heroDateBtn.addEventListener('click', () => {
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      if (isIOS && downloadIcsBtn) {
+        downloadIcsBtn.click();
+      } else {
+        window.open(googleCalendarUrl, '_blank');
+      }
+    });
+  }
+
   if (downloadIcsBtn) {
     downloadIcsBtn.addEventListener('click', () => {
       const icsLines = [
@@ -181,36 +240,16 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  const INITIAL_BLESSINGS = [
-    {
-      id: '1',
-      name: 'Dadaji & Dadi',
-      song: '',
-      message: 'May God bless Nikhil and Pranami with lifelong happiness, patience, and boundless prosperity. Always stay each other\'s strength!',
-      time: '2 hours ago'
-    },
-    {
-      id: '2',
-      name: 'Aman & Riya (Team Groom)',
-      song: 'Gallan Goodiyaan',
-      message: 'Can\'t wait to set the stage on fire! Nikhil bhai, party abhi shuru hui hai! Super excited!',
-      time: 'Yesterday'
-    },
-    {
-      id: '3',
-      name: 'Shweta Bhabhi & Rohit Bhaiya',
-      song: 'Bole Chudiyan',
-      message: 'Welcome to the family, dear Pranami! Wishing both of you eternal happiness and blessings.',
-      time: '2 days ago'
-    }
-  ];
-
   function getSavedBlessings() {
     try {
       const stored = localStorage.getItem('nikhil_pranami_blessings');
-      return stored ? JSON.parse(stored) : INITIAL_BLESSINGS;
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        return parsed.filter(b => b.id !== '1' && b.id !== '2' && b.id !== '3');
+      }
+      return [];
     } catch {
-      return INITIAL_BLESSINGS;
+      return [];
     }
   }
 
@@ -229,6 +268,18 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!blessingsGrid) return;
     const list = getSavedBlessings();
     blessingsGrid.innerHTML = '';
+
+    if (list.length === 0) {
+      blessingsGrid.innerHTML = `
+        <div style="grid-column: 1/-1; text-align: center; padding: 2.5rem 1rem; background: #FCF8F5; border: 1px dashed rgba(212, 163, 115, 0.6); border-radius: 1rem; max-width: 450px; margin: 0 auto;">
+          <div style="font-size: 1.75rem; margin-bottom: 0.5rem;">💌</div>
+          <h4 style="font-family: var(--font-serif); font-size: 1.4rem; color: #1B3A2F; margin-bottom: 0.5rem;">Be the First to Send a Blessing!</h4>
+          <p style="font-family: var(--font-sans); font-size: 0.875rem; color: rgba(27, 58, 47, 0.7); margin-bottom: 1rem;">No wishes have been posted yet. Submit the RSVP form to send your warm wishes for Nikhil & Pranami.</p>
+          <a href="#rsvp" class="rsvp-btn" style="display: inline-block; padding: 0.6rem 1.25rem; font-size: 0.75rem; text-decoration: none;">Write a Blessing</a>
+        </div>
+      `;
+      return;
+    }
 
     list.forEach(b => {
       const card = document.createElement('div');
