@@ -437,16 +437,6 @@ export default function App() {
               <span>Add to Calendar</span>
             </a>
 
-            <button
-              type="button"
-              onClick={() => setShowCodeModal(true)}
-              className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 text-xs font-sans-jost font-semibold text-[#1B3A2F] bg-white hover:bg-slate-50 rounded-lg border border-[#D4A373]/40 transition-colors"
-              title="View standalone HTML, CSS, and JS code"
-            >
-              <Code className="h-3.5 w-3.5 text-[#A34A3A]" />
-              <span>Code</span>
-            </button>
-
             <a
               href="#rsvp"
               className="py-1.5 px-4 bg-[#A34A3A] text-white font-sans-jost text-xs font-semibold tracking-wider uppercase rounded-lg hover:bg-[#A34A3A]/90 transition-colors shadow-sm"
@@ -527,17 +517,6 @@ export default function App() {
                 <CalendarPlus className="h-4 w-4 text-[#A34A3A]" />
                 <span>Add Wedding to Google Calendar</span>
               </a>
-              <button
-                type="button"
-                onClick={() => {
-                  downloadIcsFile();
-                  setMobileMenuOpen(false);
-                }}
-                className="w-full text-left py-1 text-xs text-[#1B3A2F] font-semibold flex items-center gap-2"
-              >
-                <Download className="h-4 w-4 text-[#D4A373]" />
-                <span>Download Apple / Outlook .ics Calendar</span>
-              </button>
             </div>
           </div>
         )}
@@ -1520,18 +1499,6 @@ export default function App() {
                 <span>Add to Google Calendar</span>
                 <ExternalLink className="h-3.5 w-3.5 opacity-70 ml-auto" />
               </a>
-
-              <button
-                type="button"
-                onClick={() => {
-                  downloadIcsFile();
-                  setShowCalendarModal(false);
-                }}
-                className="w-full inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-[#1B3A2F] hover:bg-[#152e25] text-[#FCF8F5] font-sans-jost text-sm font-semibold shadow-md hover:shadow-lg transition-all cursor-pointer"
-              >
-                <Download className="h-4 w-4 text-[#D4A373]" />
-                <span>Download Apple / Outlook / Phone (.ics)</span>
-              </button>
             </div>
 
             <p className="mt-4 text-[11px] font-sans-jost text-[#1B3A2F]/60">
