@@ -24,7 +24,7 @@ export const WEDDING_EVENTS: WeddingEvent[] = [
     venue: 'Royal Anand Resort & Club, Kanpur',
     description:
       'With the blessings of our elders and the grace of the Almighty, we invite you to celebrate the union of Nikhil & Pranami. Join us as two souls, two families, and countless memories come together in a sacred celebration of love, laughter, and timeless traditions.',
-    image: '/images/warm-welcome.jpg',
+    image: 'images/warm-welcome.jpg',
     align: 'left',
   },
   {
@@ -36,7 +36,7 @@ export const WEDDING_EVENTS: WeddingEvent[] = [
     venue: '335/2 Shastri Nagar, Kanpur',
     description:
       'A splash of sunshine, fragrant turmeric paste, and joyful music as we bathe the bride and groom in love, blessings, and bright yellow vibes.',
-    image: '/images/haldi.jpg',
+    image: 'images/haldi.jpg',
     align: 'right',
   },
   {
@@ -48,7 +48,7 @@ export const WEDDING_EVENTS: WeddingEvent[] = [
     venue: '335/2 Shastri Nagar, Kanpur',
     description:
       'Henna whispers heartfelt love stories on delicate palms. Join the rhythmic dholak beats, festive folk dance, and celebratory twilight hues.',
-    image: '/images/mehndi.jpg',
+    image: 'images/mehndi.jpg',
     align: 'left',
   },
   {
@@ -60,7 +60,7 @@ export const WEDDING_EVENTS: WeddingEvent[] = [
     venue: 'Royal Anand Resort & Club, Kanpur',
     description:
       'The sacred auspicious start, holy Vedic chants, vermilion tilak, and honored traditions welcoming the groom and sealing eternal family bonds.',
-    image: '/images/tilak.jpg',
+    image: 'images/tilak.jpg',
     align: 'right',
   },
   {
@@ -72,7 +72,7 @@ export const WEDDING_EVENTS: WeddingEvent[] = [
     venue: 'Royal Anand Resort & Club, Kanpur',
     description:
       'The Seven Sacred Vows around the holy Agni under starlit skies. As Nikhil and Pranami promise a lifetime of companionship, grace us with your warm presence.',
-    image: '/images/shaadi.jpg',
+    image: 'images/shaadi.jpg',
     align: 'left',
   },
   {
@@ -84,7 +84,7 @@ export const WEDDING_EVENTS: WeddingEvent[] = [
     venue: 'Royal Anand Resort & Club, Kanpur',
     description:
       'A bittersweet dawn filled with emotional smiles, tender embraces, and heartfelt blessings as our beloved Pranami embarks on her new forever journey.',
-    image: '/images/vidai.jpg',
+    image: 'images/vidai.jpg',
     align: 'right',
   },
 ];

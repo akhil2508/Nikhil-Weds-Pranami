@@ -26,6 +26,7 @@ import {
   ExternalLink
 } from 'lucide-react';
 import { weddingAudio } from './audioHelper';
+import { getAssetUrl } from './assetHelper';
 import {
   WEDDING_EVENTS,
   getGoogleCalendarUrl,
@@ -370,7 +371,7 @@ export default function App() {
   return (
     <div className="relative min-h-screen bg-[#FCF8F5] text-[#1B3A2F] selection:bg-[#D4A373]/30 selection:text-[#1B3A2F]">
       {/* Hidden audio element */}
-      <audio id="bg-music" src="/music/thousand-years.mp3" loop preload="auto" />
+      <audio id="bg-music" src={getAssetUrl('music/thousand-years.mp3')} loop preload="auto" />
 
 
 
@@ -530,7 +531,7 @@ export default function App() {
         <div
           className="absolute inset-0 bg-cover bg-center transition-transform duration-1000 scale-105"
           style={{
-            backgroundImage: `url('/images/hero.jpg'), url('/public/assets/aistudio/hero_50f70ced.jpg')`,
+            backgroundImage: `url('${getAssetUrl('images/hero.jpg')}')`,
           }}
         >
           <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/35" />
@@ -560,8 +561,18 @@ export default function App() {
       {/* DESKTOP (min-width: 901px): Fixed blurred background image. Glass cards. */}
       {/* MOBILE (max-width: 900px): Clean floating text adjusted to photo space, NO card icons, NO description overlay. */}
       {/* ============================================================== */}
-      <div id="events" className="events-desktop-container relative">
-        <div id="welcome" className="relative z-10 pt-16 pb-4 text-center">
+      <div
+        id="events"
+        className="events-desktop-container relative"
+        style={{
+          backgroundImage: `url('${getAssetUrl('images/background-image.jpg')}'), url('${getAssetUrl('images/background image.jpg')}')`,
+        }}
+      >
+        <div
+          id="welcome"
+          className="relative z-10 pt-16 pb-4 text-center bg-[#FCF8F5] md:bg-transparent"
+          style={{ backgroundImage: 'none' }}
+        >
           <h2 className="font-script text-5xl md:text-6xl text-[#1B3A2F] mt-1">
             The Wedding Story
           </h2>
@@ -585,7 +596,7 @@ export default function App() {
               <div
                 className="md:hidden absolute inset-0 bg-cover bg-center transition-all duration-300"
                 style={{
-                  backgroundImage: `url('${event.image}')`,
+                  backgroundImage: `url('${getAssetUrl(event.image)}')`,
                   filter: `blur(${blurData.blur}px)`,
                   opacity: blurData.opacity,
                 }}
@@ -610,9 +621,9 @@ export default function App() {
                     : 'flex'
                 } ${
                   event.id === 'mehndi'
-                    ? 'pt-38 sm:pt-40 md:pt-0'
+                    ? 'pt-[11.5rem] sm:pt-44 md:pt-0'
                     : event.id === 'haldi'
-                    ? 'pt-28 sm:pt-32 md:pt-0'
+                    ? 'pt-[7.5rem] sm:pt-32 md:pt-0'
                     : 'pt-16 sm:pt-0'
                 }`}
               >
@@ -661,14 +672,16 @@ export default function App() {
                             event.id === 'haldi'
                               ? 'text-[#1B3A2F]'
                               : event.id === 'tilak'
-                              ? 'text-white md:text-[#A34A3A]'
+                              ? 'text-white md:text-[#A34A3A] drop-shadow-md'
                               : 'text-[#D4A373] md:text-[#A34A3A]'
                           }`}
                         >
-                          <span className="opacity-90 font-serif-cormorant italic text-lg sm:text-xl">
+                          <span className={`opacity-90 font-serif-cormorant italic text-lg sm:text-xl ${
+                            event.id === 'tilak' ? 'text-white' : ''
+                          }`}>
                             Date:{' '}
                           </span>
-                          <span>{event.date}</span>
+                          <span className={event.id === 'tilak' ? 'text-white' : ''}>{event.date}</span>
                         </div>
 
                         {/* Time: for Haldi mobile strictly #1B3A2F */}

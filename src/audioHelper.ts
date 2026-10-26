@@ -15,7 +15,9 @@ class WeddingAudioManager {
   constructor() {
     if (typeof window !== 'undefined') {
       this.audioEl = new Audio();
-      this.audioEl.src = '/music/thousand-years.mp3';
+      const baseUrl = import.meta.env.BASE_URL || './';
+      const cleanBase = baseUrl.endsWith('/') ? baseUrl : baseUrl + '/';
+      this.audioEl.src = `${cleanBase}music/thousand-years.mp3`;
       this.audioEl.loop = true;
       this.audioEl.volume = 0.55;
     }

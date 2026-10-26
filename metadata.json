@@ -2,5 +2,7 @@
   "name": "Nikhil & Pranami Wedding",
   "description": "An elegant, cinematic wedding celebration website for Nikhil & Pranami featuring event timelines, venue details, interactive RSVP, and blessings wall.",
   "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
 }
