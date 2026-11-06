@@ -35,6 +35,8 @@ jobs:
         run: npm install --legacy-peer-deps
 
       - name: Build application
+        env:
+          VITE_GOOGLE_APPS_SCRIPT_URL: ${{ vars.VITE_GOOGLE_APPS_SCRIPT_URL }}
         run: npm run build
 
       - name: Setup Pages

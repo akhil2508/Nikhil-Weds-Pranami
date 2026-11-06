@@ -1,6 +1,8 @@
 // script.js - Nikhil & Pranami Wedding Website
 
 document.addEventListener('DOMContentLoaded', () => {
+  const sheetsUrl = window.WEDDING_SHEETS_URL || '';
+
   // Elements
   const bgAudio = document.getElementById('bg-music');
   const floatingMusicBtn = document.getElementById('floating-music-btn');
@@ -259,6 +261,70 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  function loadSharedBlessings() {
+    return new Promise((resolve, reject) => {
+      const callbackName = `__weddingBlessings_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+      const callbackWindow = window;
+      const script = document.createElement('script');
+      const url = new URL(sheetsUrl);
+      let timeout;
+
+      const cleanup = () => {
+        window.clearTimeout(timeout);
+        delete callbackWindow[callbackName];
+        script.remove();
+      };
+
+      callbackWindow[callbackName] = (entries) => {
+        cleanup();
+        if (!Array.isArray(entries)) {
+          reject(new Error('Google Sheets returned an invalid blessings list.'));
+          return;
+        }
+        resolve(entries);
+      };
+
+      url.searchParams.set('action', 'list');
+      url.searchParams.set('callback', callbackName);
+      script.src = url.toString();
+      script.onerror = () => {
+        cleanup();
+        reject(new Error('Could not load blessings from Google Sheets.'));
+      };
+      timeout = window.setTimeout(() => {
+        cleanup();
+        reject(new Error('Timed out while loading blessings from Google Sheets.'));
+      }, 15000);
+      document.head.appendChild(script);
+    });
+  }
+
+  async function submitBlessingToSheets(entry) {
+    await fetch(sheetsUrl, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(entry)
+    });
+    const entries = await loadSharedBlessings();
+    if (!entries.some(saved => saved.id === entry.id)) {
+      throw new Error('Google Sheets did not confirm the response.');
+    }
+    return entries;
+  }
+
+  function mergeBlessings(remote, local) {
+    const localById = new Map(local.map(entry => [entry.id, entry]));
+    const remoteIds = new Set(remote.map(entry => entry.id));
+    return [
+      ...remote.map(entry => {
+        const cached = localById.get(entry.id);
+        return cached ? { ...entry, likes: cached.likes } : entry;
+      }),
+      ...local.filter(entry => !remoteIds.has(entry.id))
+    ];
+  }
+
   function saveBlessing(entry) {
     const list = getSavedBlessings();
     list.unshift(entry);
@@ -292,7 +358,7 @@ document.addEventListener('DOMContentLoaded', () => {
       card.className = 'blessing-card';
       card.innerHTML = `
         <h4>${escapeHTML(b.name)}</h4>
-        <span style="font-size:0.75rem; color:#A34A3A; font-family:var(--font-sans); display:block; margin-bottom:0.4rem;">${escapeHTML(b.time || 'Recently')}</span>
+        <span style="font-size:0.75rem; color:#A34A3A; font-family:var(--font-sans); display:block; margin-bottom:0.4rem;">${escapeHTML(b.time || b.timestamp || 'Recently')}</span>
         ${b.song ? `<div style="font-size:0.85rem; color:#A34A3A; font-family:var(--font-sans); margin-bottom:0.5rem; font-weight:600;">🎶 Track: ${escapeHTML(b.song)}</div>` : ''}
         <p style="font-style: italic; color:#1B3A2F;">"${escapeHTML(b.message)}"</p>
       `;
@@ -312,8 +378,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
   renderBlessings();
 
+  if (sheetsUrl) {
+    loadSharedBlessings()
+      .then(entries => {
+        const merged = mergeBlessings(entries, getSavedBlessings());
+        localStorage.setItem('nikhil_pranami_blessings', JSON.stringify(merged));
+        renderBlessings();
+      })
+      .catch(error => console.error('Unable to load blessings from Google Sheets:', error));
+  }
+
   // Handle RSVP Submit
-  rsvpForm.addEventListener('submit', (e) => {
+  rsvpForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const nameVal = document.getElementById('rsvp-name').value.trim();
     const attendingVal = document.getElementById('rsvp-attending').value;
@@ -321,15 +397,32 @@ document.addEventListener('DOMContentLoaded', () => {
     const finalSong = customSongInput.value.trim() || selectedSongChip || (danceVal === 'Yes' ? 'Bollywood Hits' : '');
     const messageVal = document.getElementById('rsvp-message').value.trim() || (attendingVal === 'Yes' ? 'Looking forward to celebrating with you both!' : 'Warmest wishes and blessings for your wedding!');
 
-    saveBlessing({
-      id: String(Date.now()),
+    const entry = {
+      id: `blessing-${crypto.randomUUID()}`,
       name: nameVal,
+      attending: attendingVal,
+      dancing: danceVal,
       song: finalSong,
       message: messageVal,
-      time: 'Just now'
-    });
+      timestamp: new Date().toISOString(),
+      time: 'Just now',
+      likes: 1
+    };
+    saveBlessing(entry);
 
-    alert('Dhanyavaad! Your RSVP and Blessing have been recorded.');
+    let responseMessage = 'Dhanyavaad! Your Blessing is on this browser’s wall, but Google Sheets is not configured.';
+    if (sheetsUrl) {
+      try {
+        const remoteEntries = await submitBlessingToSheets(entry);
+        localStorage.setItem('nikhil_pranami_blessings', JSON.stringify(mergeBlessings(remoteEntries, getSavedBlessings())));
+        renderBlessings();
+        responseMessage = 'Dhanyavaad! Your RSVP and Blessing have been saved to Google Sheets and added to the shared Blessings Wall.';
+      } catch (error) {
+        console.error('Unable to save RSVP to Google Sheets:', error);
+        responseMessage = 'Your Blessing is on this browser’s wall, but it could not be confirmed in Google Sheets.';
+      }
+    }
+    alert(responseMessage);
     rsvpForm.reset();
     danceExtra.classList.add('hidden');
     selectedSongChip = '';

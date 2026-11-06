@@ -38,16 +38,22 @@ import {
   downloadIcsFile,
   type WeddingEvent
 } from './weddingData';
+import { loadBlessings, saveBlessingToSheets, type BlessingEntry } from './blessingsApi';
 
-interface Blessing {
-  id: string;
-  name: string;
-  attending: string;
-  dancing: string;
-  song?: string;
-  message: string;
-  timestamp: string;
-  likes: number;
+type Blessing = BlessingEntry;
+
+const SHEETS_ENDPOINT = import.meta.env.VITE_GOOGLE_APPS_SCRIPT_URL?.trim() ?? '';
+
+function mergeBlessings(remote: Blessing[], local: Blessing[]): Blessing[] {
+  const localById = new Map(local.map((blessing) => [blessing.id, blessing]));
+  const remoteIds = new Set(remote.map((blessing) => blessing.id));
+  return [
+    ...remote.map((blessing) => {
+      const cached = localById.get(blessing.id);
+      return cached ? { ...blessing, likes: cached.likes } : blessing;
+    }),
+    ...local.filter((blessing) => !remoteIds.has(blessing.id)),
+  ];
 }
 
 const SONG_CHIPS = [
@@ -100,6 +106,10 @@ export default function App() {
   const [customSong, setCustomSong] = useState('');
   const [blessingMessage, setBlessingMessage] = useState('');
   const [formSubmitted, setFormSubmitted] = useState(false);
+  const [submissionSynced, setSubmissionSynced] = useState(false);
+  const [submissionError, setSubmissionError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [blessingsLoadError, setBlessingsLoadError] = useState('');
 
   // Blessings Wall - empty by default, only populated when a guest gives a blessing
   const [blessings, setBlessings] = useState<Blessing[]>([]);
@@ -114,21 +124,39 @@ export default function App() {
 
   // Initialize blessings from localStorage, stripping any legacy seed examples
   useEffect(() => {
+    let localBlessings: Blessing[] = [];
     try {
       const stored = localStorage.getItem('wedding_blessings_nikhil_pranami');
       if (stored) {
         const parsed: Blessing[] = JSON.parse(stored);
         // Exclude legacy mock seed examples
-        const realBlessings = parsed.filter((b) => !b.id.startsWith('seed-'));
-        setBlessings(realBlessings);
-        localStorage.setItem('wedding_blessings_nikhil_pranami', JSON.stringify(realBlessings));
-      } else {
-        setBlessings([]);
+        localBlessings = parsed.filter((b) => !b.id.startsWith('seed-'));
       }
+      setBlessings(localBlessings);
+      localStorage.setItem('wedding_blessings_nikhil_pranami', JSON.stringify(localBlessings));
     } catch {
       setBlessings([]);
     }
+
+    if (SHEETS_ENDPOINT) {
+      loadBlessings(SHEETS_ENDPOINT)
+        .then((remoteBlessings) => {
+          setBlessings((currentBlessings) => mergeBlessings(remoteBlessings, currentBlessings));
+        })
+        .catch((error: unknown) => {
+          console.error('Unable to load blessings from Google Sheets:', error);
+          setBlessingsLoadError('The shared Blessings Wall could not be loaded. Showing entries saved in this browser.');
+        });
+    }
   }, []);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('wedding_blessings_nikhil_pranami', JSON.stringify(blessings));
+    } catch (error) {
+      console.error('Unable to cache blessings in this browser:', error);
+    }
+  }, [blessings]);
 
   // IntersectionObserver for reveal animations
   useEffect(() => {
@@ -233,13 +261,15 @@ export default function App() {
   };
 
   // RSVP Submit Handler
-  const handleRsvpSubmit = (e: React.FormEvent) => {
+  const handleRsvpSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
 
+    setIsSubmitting(true);
+    setSubmissionError('');
     const chosenSong = customSong.trim() || selectedSong || (dancing === 'Yes' ? 'Bollywood Mashup' : undefined);
     const newBlessing: Blessing = {
-      id: 'blessing-' + Date.now(),
+      id: `blessing-${crypto.randomUUID()}`,
       name: name.trim(),
       attending,
       dancing,
@@ -249,14 +279,30 @@ export default function App() {
       likes: 1,
     };
 
-    const updated = [newBlessing, ...blessings];
-    setBlessings(updated);
+    let updated = [newBlessing, ...blessings];
     try {
       localStorage.setItem('wedding_blessings_nikhil_pranami', JSON.stringify(updated));
     } catch {
       // ignore
     }
+    setBlessings(updated);
 
+    if (SHEETS_ENDPOINT) {
+      try {
+        const remoteBlessings = await saveBlessingToSheets(SHEETS_ENDPOINT, newBlessing);
+        setBlessings((currentBlessings) => mergeBlessings(remoteBlessings, currentBlessings));
+        setSubmissionSynced(true);
+      } catch (error) {
+        console.error('Unable to save RSVP to Google Sheets:', error);
+        setSubmissionSynced(false);
+        setSubmissionError(error instanceof Error ? error.message : 'The response could not be confirmed in Google Sheets.');
+      }
+    } else {
+      setSubmissionSynced(false);
+      setSubmissionError('Google Sheets is not configured. This response is saved only in this browser.');
+    }
+
+    setIsSubmitting(false);
     setFormSubmitted(true);
     setName('');
     setCustomSong('');
@@ -1076,8 +1122,15 @@ export default function App() {
                   Dhanyavaad! Thank You!
                 </h3>
                 <p className="font-sans-jost text-sm text-[#1B3A2F]/80">
-                  Your response and blessing have been recorded and added to the Blessings Wall below.
+                  {submissionSynced
+                    ? 'Your response and blessing have been saved and added to the shared Blessings Wall.'
+                    : 'Your response is on this browser’s Blessings Wall, but it was not synced to Google Sheets.'}
                 </p>
+                {!submissionSynced && (
+                  <p role="alert" className="font-sans-jost text-sm text-[#A34A3A]">
+                    {submissionError}
+                  </p>
+                )}
               </div>
             ) : (
               <form onSubmit={handleRsvpSubmit} className="space-y-6">
@@ -1221,10 +1274,11 @@ export default function App() {
 
                 <button
                   type="submit"
-                  className="w-full py-3.5 px-6 bg-[#A34A3A] text-white font-sans-jost font-semibold text-sm tracking-wider uppercase rounded-xl hover:bg-[#A34A3A]/90 active:scale-98 transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
+                  disabled={isSubmitting}
+                  className="w-full py-3.5 px-6 bg-[#A34A3A] text-white font-sans-jost font-semibold text-sm tracking-wider uppercase rounded-xl hover:bg-[#A34A3A]/90 active:scale-98 transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-wait"
                 >
                   <Send className="h-4 w-4" />
-                  <span>Send RSVP & Blessings</span>
+                  <span>{isSubmitting ? 'Saving RSVP & Blessing…' : 'Send RSVP & Blessings'}</span>
                 </button>
               </form>
             )}
@@ -1246,6 +1300,11 @@ export default function App() {
             <p className="font-serif-cormorant text-lg text-[#1B3A2F]/80">
               Heartfelt messages from family, friends, and loved ones.
             </p>
+            {blessingsLoadError && (
+              <p role="alert" className="mt-3 font-sans-jost text-sm text-[#A34A3A]">
+                {blessingsLoadError}
+              </p>
+            )}
           </div>
 
           {blessings.length === 0 ? (
